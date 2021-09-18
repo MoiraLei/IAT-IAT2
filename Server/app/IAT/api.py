@@ -30,7 +30,7 @@ def addTreeNote(project_id, pid, name, type, user_id, index_id):
   return data.id
 
 
-# 添加接口
+# 新建项目
 @api.route('/addProject', methods=['POST'])
 def addProject():
   user_id = session.get('user_id')
@@ -44,7 +44,7 @@ def addProject():
   except Exception as e:
     return make_response(jsonify({'code': 10002, 'content': None, 'msg': u'新建失败!'}))
 
-
+# 项目列表
 @api.route('/projectList', methods=['GET'])
 def projectList():
   user_id = session.get('user_id')
@@ -75,7 +75,7 @@ def projectList():
       })
   return make_response(jsonify({'code': 0, 'msg': '', 'content': content}))
 
-
+# 设置项目状态
 @api.route('/setProjectStatus', methods=['POST'])
 def setProjectStatus():
   user_id = session.get('user_id')
@@ -90,7 +90,7 @@ def setProjectStatus():
   else:
     return make_response(jsonify({'code': 10001, 'msg': 'no such Project', 'content': []}))
 
-
+# 更新树索引
 @api.route('/updateTreeIndex', methods=['POST'])
 def updateTreeIndex():
   user_id = session.get('user_id')
@@ -110,12 +110,16 @@ def updateTreeIndex():
   else:
     return make_response(jsonify({'code': 10001, 'msg': 'no such Project', 'content': []}))
 
-
+# 获取树
 @api.route('/treeList')
 def treeList():
   user_id = session.get('user_id')
   id = request.values.get("id")
-  listData = Tree.query.filter(db.and_(Tree.project_id == id)).order_by(db.asc(Tree.index_id)).all()
+
+  # listData = Tree.query.filter(db.and_(Tree.project_id == id)).order_by(db.asc(Tree.index_id)).all()
+  # 修改按照名称排序
+  listData = Tree.query.filter(db.and_(Tree.project_id == id)).order_by(db.asc(Tree.name)).all()
+
 
   def getChild(pid):
     result = []
@@ -134,12 +138,17 @@ def treeList():
 
   return make_response(jsonify({'code': 0, 'msg': 'sucess', 'content': content}))
 
-
+# 项目用例列表
 @api.route('/projectCaseList', methods=['POST'])
 def projectCaseList():
   user_id = session.get('user_id')
   id = request.json.get("id")
-  listData = Tree.query.filter(db.and_(Tree.project_id == id, Tree.type == 2)).order_by(db.asc(Tree.index_id)).all()
+  # 查询出所有为测试用例类型的并按照index_id排序
+  # listData = Tree.query.filter(db.and_(Tree.project_id == id, Tree.type == 2)).order_by(db.asc(Tree.index_id)).all()
+
+  # 可以修改为先按照pid排序，再按照名称排序
+  listData = Tree.query.filter(db.and_(Tree.project_id == id, Tree.type == 2)).order_by(db.asc(Tree.pid), db.asc(Tree.name)).all()
+
   content = []
   for case in listData:
     caseData = iatCaseInfo.query.filter_by(pid=case.id).first()
@@ -150,7 +159,7 @@ def projectCaseList():
       })
   return make_response(jsonify({'code': 0, 'msg': 'sucess', 'content': content}))
 
-
+# 添加子目录
 @api.route('/addSubFolder', methods=['POST'])
 def addSubFolder():
   user_id = session.get('user_id')
@@ -167,7 +176,7 @@ def addSubFolder():
   except Exception as e:
     return make_response(jsonify({'code': 10002, 'content': None, 'msg': u'新建失败!'}))
 
-
+# 删除目录
 @api.route('/deleteFolder', methods=['POST'])
 def deleteFolder():
   user_id = session.get('user_id')
@@ -186,7 +195,7 @@ def deleteFolder():
   except Exception as e:
     return make_response(jsonify({'code': 10002, 'content': None, 'msg': u'删除失败!'}))
 
-
+# 删除用例
 @api.route('/deleteCase', methods=['POST'])
 def deleteCase():
   user_id = session.get('user_id')
@@ -205,7 +214,7 @@ def deleteCase():
   except Exception as e:
     return make_response(jsonify({'code': 10002, 'content': None, 'msg': u'删除失败!'}))
 
-
+# 复制用例
 @api.route('/copyCase', methods=['POST'])
 def copyCase():
   user_id = session.get('user_id')
@@ -226,7 +235,7 @@ def copyCase():
   except Exception as e:
     return make_response(jsonify({'code': 10002, 'content': None, 'msg': u'复制成功!'}))
 
-
+# 新增用例
 @api.route('/addCase', methods=['POST'])
 def addCase():
   user_id = session.get('user_id')
@@ -243,7 +252,7 @@ def addCase():
   except Exception as e:
     return make_response(jsonify({'code': 10002, 'content': None, 'msg': u'新建失败!'}))
 
-
+# 添加任务
 @api.route('/addTask', methods=['POST'])
 def addTask():
   user_id = session.get('user_id')
@@ -277,7 +286,7 @@ def addTask():
   except:
     return make_response(jsonify({'code': 10002, 'content': None, 'msg': u'新建失败!'}))
 
-
+# 修改任务信息
 @api.route('/updateTaskInfo', methods=['POST'])
 def updateTaskInfo():
   user_id = session.get('user_id')
@@ -327,7 +336,7 @@ def updateTaskInfo():
   except:
     return make_response(jsonify({'code': 10002, 'content': None, 'msg': u'更新失败!'}))
 
-
+# 更新运行时间
 @api.route('/updateRunTime', methods=['POST'])
 def updateRunTime():
   user_id = session.get('user_id')
@@ -351,12 +360,13 @@ def updateRunTime():
   except:
     return make_response(jsonify({'code': 10002, 'content': None, 'msg': u'更新失败!'}))
 
-
+# 任务列表查询
 @api.route('/taskList', methods=['POST'])
 def taskList():
   user_id = session.get('user_id')
   taskType = request.json.get("taskType")
   pageNum = request.json.get("pageNum")
+
   dataCount = Task.query.filter(db.and_(Task.task_type == taskType, )).count()
   if pageNum:
     listData = Task.query.filter(db.and_(Task.task_type == taskType, )).order_by(db.desc(Task.add_time)).slice((pageNum - 1) * 20, pageNum * 20).all()
@@ -387,7 +397,7 @@ def taskList():
 
   return make_response(jsonify({'code': 0, 'content': content, 'msg': u''}))
 
-
+# 任务详细
 @api.route('/taskInfo')
 def taskInfo():
   id = request.values.get("id")
@@ -436,7 +446,7 @@ def taskInfo():
   }
   return make_response(jsonify({'code': 0, 'content': content, 'msg': u''}))
 
-
+# 获取任务状态
 @api.route('/getTaskStatus')
 def getTaskStatus():
   id = request.values.get("id")
@@ -450,16 +460,18 @@ def getTaskStatus():
   else:
     return make_response(jsonify({'code': 10002, 'content': None, 'msg': u''}))
 
-
+# 查看报告
 @api.route('/taskResult')
 def taskResult():
   id = request.values.get("id")
   taskData = Task.query.filter(db.and_(Task.id == id, )).first()
   try:
+    # 获取任务的所有的case
     caseIds = json.loads(taskData.case)
   except:
     caseIds = []
   try:
+    # 获取执行结果
     results = json.loads(taskData.result)
   except:
     results = []
@@ -467,20 +479,28 @@ def taskResult():
     daily_result = json.loads(taskData.daily_result)
   except:
     daily_result = []
+
   sucess = []
   fail = []
   for index in range(len(results)):
+
     results[index]["id"] = caseIds[index]
     if results[index]["success"] == "True":
+      # 将成功的存入sucess，方便后续计算统计结果
       sucess.append(caseIds[index])
       results[index]["failureMessage"] = "success"
+
     if results[index]["success"] == "False":
+      # 将失败的存入fail，方便后续计算统计结果
       fail.append(caseIds[index])
+
   if len(results) > 0:
+    # 开始时间为第一个案例的时间
     startTime = results[0]["timeStamp"]
   else:
     startTime = 0
   if len(results) > 1:
+    # 结束时间为最后一个案例的时间
     endTime = results[len(results) - 1]["timeStamp"]
   else:
     endTime = startTime
@@ -521,7 +541,7 @@ def taskPrew():
   }
   return make_response(jsonify({'code': 0, 'content': content, 'msg': u''}))
 
-
+# 任务开始执行
 @api.route('/taskExcute', methods=['POST'])
 def taskExcute():
   user_id = session.get('user_id')
@@ -540,7 +560,7 @@ def taskExcute():
   else:
     return make_response(jsonify({'code': 10001, 'msg': u'执行失败!', 'content': None}))
 
-
+# 任务删除
 @api.route('/taskDelete', methods=['POST'])
 def taskDelete():
   user_id = session.get('user_id')
@@ -600,7 +620,7 @@ def getSampleInfo():
   }
   return make_response(jsonify({'code': 0, 'content': content, 'msg': u''}))
 
-
+# 获取参数化信息
 @api.route('/getExtractList', methods=['POST'])
 def getExtractList():
   user_id = session.get('user_id')
@@ -621,7 +641,7 @@ def getExtractList():
         })
   return make_response(jsonify({'code': 0, 'content': content, 'msg': u''}))
 
-
+# 修改目录名称
 @api.route('/updateFolderName', methods=['POST'])
 def updateFolderName():
   user_id = session.get('user_id')
@@ -650,6 +670,7 @@ def updateTaskStatus():
   else:
     return make_response(jsonify({'code': 10001, 'msg': 'fail', 'content': []}))
 
+# 当前日期？？？
 def formatUnixDay(day):
   thisYear = datetime.datetime.now().year
   thisMonth = datetime.datetime.now().month
@@ -681,13 +702,19 @@ def formatMounthResult(dayDatas):
     monthResult.append(oneDayData)
   return monthResult
 
+# 获取首页数据
 @api.route('/getHomeData')
 def getHomeData():
   user_id = session.get('user_id')
+  # 用例总数
   caseCount = Sample.query.filter().count()
+  # 项目总数
   projectCount = Project.query.filter(db.and_(Project.status == 1)).count()
+  # 定时任务总数
   immTaskCount = Task.query.filter(db.and_(Task.task_type == 1)).count()
-  timTaskCount = Task.query.filter(db.and_(Task.task_type == 2)).count()
+  # 即时任务总数
+  timTaskCount = Task.query.filter(db.and_(Task.task_type == 2)).count(
+  # 最近20条任务
   nearTasks = Task.query.filter(db.and_(Task.task_type != 3)).order_by(db.desc(Task.add_time)).limit(20).all()
   historys = TaskCount.query.filter(
     db.and_(
