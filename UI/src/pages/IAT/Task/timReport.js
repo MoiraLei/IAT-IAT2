@@ -22,10 +22,12 @@ const { Panel } = Collapse;
   iatTask,
   loading: loading.effects['iatTask/queryTaskResult']
 }))
+
+// 测试图表
 class timReport extends PureComponent {
   state={
     taskResult: {},
-    charData: [{ title: '', x: 0, y: 0 }],
+    charData: [{ title: '测试结果', x: 0, y: 0 }],
     result: [{
       x: '测试通过',
       y: 0
@@ -86,6 +88,9 @@ class timReport extends PureComponent {
     const { loading } = this.props;
     const content = (
       <div className={styles.pageHeaderContent}>
+        <p>
+          任务描述：<span>{taskResult.taskDesc}</span>
+        </p>
         <p>
           开始时间：{moment(parseInt(taskResult.startTime)).format('YYYY-MM-DD HH:mm:ss')}
         </p>

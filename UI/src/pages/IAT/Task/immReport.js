@@ -78,6 +78,9 @@ class immReport extends PureComponent {
     const content = (
       <div className={styles.pageHeaderContent}>
         <p>
+          功能简介：{taskResult.testDesc}
+        </p>
+        <p>
           开始时间：{moment(parseInt(taskResult.startTime)).format('YYYY-MM-DD HH:mm:ss')}
         </p>
         <p>
@@ -115,7 +118,9 @@ class immReport extends PureComponent {
                       key={index}
                       className={item.success === 'True' ? styles.caseSucess : styles.caseFail}
                     >
-                      <p>{item.failureMessage}</p>
+                      <p>测试结果：{item.failureMessage}</p>
+                      {/*<p>success: {item.success}</p>*/}
+                      <p>请求响应: {item.response}</p>
                     </Panel>
                   ))}
               </Collapse>
