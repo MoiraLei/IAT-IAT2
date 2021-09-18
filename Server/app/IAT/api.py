@@ -146,7 +146,7 @@ def projectCaseList():
   # 查询出所有为测试用例类型的并按照index_id排序
   # listData = Tree.query.filter(db.and_(Tree.project_id == id, Tree.type == 2)).order_by(db.asc(Tree.index_id)).all()
 
-  # 可以修改为先按照pid排序，再按照名称排序
+  #可以修改为先按照pid排序，再按照名称排序
   listData = Tree.query.filter(db.and_(Tree.project_id == id, Tree.type == 2)).order_by(db.asc(Tree.pid), db.asc(Tree.name)).all()
 
   content = []
